@@ -11,6 +11,7 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
+import { toast } from 'sonner';
 interface User {
   id: string;
   email: string;
@@ -76,14 +77,31 @@ const openEditModal = (product: Product) => {
     fetchData();
   }, [session, status, router]);
 
-  const handleRemove = async (id: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-    try {
-      await fetch(`/api/products/${id}`, { method: 'DELETE' });
-    } catch {
-      alert('Ошибка при удалении');
+const handleRemove = async (id: string) => {
+  console.log('Пытаемся удалить продукт с ID:', id);
+
+  try {
+    const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('Сервер вернул:', text);
+      toast.error("Ошибка при удалении продукта с ID: " + id);
+      return;
     }
-  };
+
+    // Найдём удаляемый продукт (до удаления из состояния)
+    const removedProduct = products.find((p) => p.id === id);
+    console.log('Удалён продукт:', removedProduct);
+
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+    toast.success('Продукт удалён: ' + removedProduct?.title || id);
+  } catch (error) {
+    console.error('Ошибка при удалении:', error);
+    alert('Ошибка при удалении');
+  }
+};
+
 
   const filtered = products.filter((p) =>
     `${p.title} ${p.price}`.toLowerCase().includes(search.toLowerCase())

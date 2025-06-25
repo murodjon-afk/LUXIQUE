@@ -9,6 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { toast } from 'sonner'
 
 interface Product {
   id: string;         // ← строка
@@ -42,24 +43,25 @@ export default function ProductsTable() {
 
     fetchProducts()
   }, [])
-
-  const deleteProduct = async (id: number) => {
+const deleteProduct = async (id: number) => {
   try {
     const res = await fetch(`/api/products/${id}`, {
       method: 'DELETE',
-    })
+    });
 
     if (!res.ok) {
-      throw new Error('Ошибка при удалении')
+      const text = await res.text();
+      console.error('Ответ от сервера:', text);
+      throw new Error('Ошибка при удалении');
     }
 
-    // Здесь Number(id) не нужен, потому что id уже number
-setProducts(prev => prev.filter(p => Number(p.id) !== id))
+    setProducts(prev => prev.filter(p => Number(p.id) !== id));
   } catch (error) {
-    console.error('Ошибка:', error)
-    alert('Не удалось удалить продукт')
+    console.error('Ошибка:', error);
+    toast.error('Ошибка при удалении продукта');
   }
-}
+};
+
 
 
   const filteredProducts = products.filter(product => {
