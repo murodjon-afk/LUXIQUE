@@ -2,16 +2,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import path from 'path';
 import { writeFile, mkdir } from 'fs/promises';
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const idParam = searchParams.get('id');
+
+    if (idParam) {
+      const id = parseInt(idParam);
+      if (isNaN(id)) {
+        return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+      }
+
+      const product = await prisma.product.findUnique({
+        where: { id },
+      });
+
+      if (!product) {
+        return NextResponse.json([], { status: 200 }); // важно: пустой массив
+      }
+
+      return NextResponse.json([product]); // массив, чтобы frontend не ломался
+    }
+
+    // Без id — вернуть все товары
     const products = await prisma.product.findMany();
     return NextResponse.json(products);
-  } catch {
-  return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+  } catch (error) {
+    console.error("❌ Ошибка в GET /api/products:", error);
+    return NextResponse.json({ error: 'Ошибка сервера' }, { status: 500 });
+  }
 }
-
-}
-
 
 export async function POST(request: NextRequest) {
   try {

@@ -43,53 +43,54 @@ export default function ProductPage() {
   const params = useParams();
   const id = params.id;
   const [product, setProduct] = useState<Product | null>(null);
-  const [allProduct ,setAllProducts]= useState<Product[]>([]);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+useEffect(() => {
+  if (!id) return;
 
-  useEffect(() => {
-    if (!id) return;
+ const fetchProductAndSimilar = async () => {
+  try {
+    // Получаем продукт по id через query
+    const res = await fetch(`/api/products?id=${id}`);
+    if (!res.ok) throw new Error("Ошибка загрузки продукта");
+    const productList: Product[] = await res.json();
+    const data = productList[0]; // берём первый  товар
+    if (!data) throw new Error("Продукт не найден");
+    setProduct(data);
 
-    const fetchProductAndSimilar = async () => {
-      try {
-        const res = await fetch(`/api/products/${id}`);
-        if (!res.ok) throw new Error("Ошибка загрузки продукта");
-        const data = await res.json();
-        setProduct(data);
-    
-        // Загружаем все продукты
-  const allRes = await fetch("/api/products");
-const allProducts: Product[] = await allRes.json();
+    // Загружаем все продукты
+    const allRes = await fetch("/api/products");
+    const allProducts: Product[] = await allRes.json();
 
-setAllProducts(allProduct);
+    // Находим похожие
+    const similar = allProducts.filter(
+      (p) => p.category === data.category && p.id !== data.id
+    );
 
-        // Находим похожие
-        const similar = allProducts.filter(
-          (p) => p.category === data.category && p.id !== data.id
-        );
+    let result = [...similar];
 
-        let result = [...similar];
+    // Добавим недостающие из других категорий
+    const needCount = 5 - result.length;
+    if (needCount > 0) {
+      const others = allProducts
+        .filter((p) => p.category !== data.category && p.id !== data.id)
+        .slice(0, needCount);
+      result = [...result, ...others];
+    }
 
-        // Добавим недостающие из других категорий
-        const needCount = 5 - result.length;
-        if (needCount > 0) {
-          const others = allProducts
-            .filter((p) => p.category !== data.category && p.id !== data.id)
-            .slice(0, needCount);
-          result = [...result, ...others];
-        }
+    setSimilarProducts(result);
+  } catch (e) {
+    setError((e as Error).message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-        setSimilarProducts(result);
-      } catch (e) {
-        setError((e as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchProductAndSimilar();
-  }, [id , allProduct]);
+  fetchProductAndSimilar();
+}, [id]); 
+
 
   
   if (loading) {
