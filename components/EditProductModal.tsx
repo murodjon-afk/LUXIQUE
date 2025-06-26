@@ -54,60 +54,71 @@ export default function EditProductModal({ isOpen, onClose, product, setProducts
     if (file) setImageFile(file);
   };
 
-  const handleSubmit = async () => {
-    if (!title || !price || !category) return toast.error('⚠️ Заполните обязательные поля');
+const handleSubmit = async () => {
+  if (!title || !price || !category) {
+    return toast.error('⚠️ Заполните обязательные поля');
+  }
 
-    try {
-      const res = await fetch('/api/users');
-      const { users } = await res.json();
-      const currentUser = users.find((u: User) => u.email?.toLowerCase() === session?.user?.email?.toLowerCase());
+  if (!product) return toast.error('Продукт не найден');
 
-      if (!currentUser) {
-        toast.error('❌ Пользователь не найден');
-        return;
-      }
+  try {
+    const res = await fetch('/api/users');
+    const { users } = await res.json();
 
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('price', price);
-      formData.append('description', description);
-      formData.append('category', category);
-      formData.append('userId', String(currentUser.id));
+    const currentUser = users.find(
+      (u: User) => u.email?.toLowerCase() === session?.user?.email?.toLowerCase()
+    );
 
-      const parsedCount = parseInt(count);
-      const ratingWrapper = {
-        rating: {
-          rating: 0,
-          count: isNaN(parsedCount) ? 0 : parsedCount,
-        },
-      };
-      formData.append('rating', JSON.stringify(ratingWrapper.rating));
-
-      if (imageFile) formData.append('image', imageFile);
-
-      const response = await fetch(`/api/products/${product.id}`, {
-        method: 'PATCH',
-        body: formData,
-      });
-
-      const responseText = await response.text();
-      console.log('Ответ от API:', responseText);
-
-      if (!response.ok) {
-        toast.error('❌ Ошибка при обновлении');
-        return;
-      }
-
-      const updatedProduct = JSON.parse(responseText);
-      setProducts(prev => prev.map(p => (p.id === updatedProduct.id ? updatedProduct : p)));
-
-      toast.success('✅ Продукт успешно обновлён');
-      onClose();
-    } catch (error) {
-      console.error('💥 Ошибка обновления:', error);
-      toast.error('Ошибка при обновлении');
+    if (!currentUser) {
+      return toast.error('❌ Пользователь не найден');
     }
-  };
+
+    const formData = new FormData();
+    formData.append('id', product.id); // ✅ обязательно, если PATCH через `/api/products`
+    formData.append('title', title);
+    formData.append('price', price);
+    formData.append('description', description);
+    formData.append('category', category);
+    formData.append('userId', String(currentUser.id));
+
+    const parsedCount = parseInt(count);
+    const rating = {
+      rate: 0, // или можешь заменить на актуальный rate, если он у тебя есть
+      count: isNaN(parsedCount) ? 0 : parsedCount,
+    };
+    formData.append('rating', JSON.stringify(rating));
+
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+
+    const response = await fetch('/api/products', {
+      method: 'PATCH',
+      body: formData,
+    });
+
+    const responseText = await response.text();
+    console.log('Ответ от API:', responseText);
+
+    if (!response.ok) {
+      toast.error('❌ Ошибка при обновлении');
+      return;
+    }
+
+    const updatedProduct = JSON.parse(responseText);
+
+    setProducts((prev) =>
+      prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+    );
+
+    toast.success('✅ Продукт успешно обновлён');
+    onClose();
+  } catch (error) {
+    console.error('💥 Ошибка обновления:', error);
+    toast.error('Ошибка при обновлении');
+  }
+};
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">

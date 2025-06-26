@@ -78,27 +78,28 @@ const openEditModal = (product: Product) => {
   }, [session, status, router]);
 
 const handleRemove = async (id: string) => {
-  console.log('Пытаемся удалить продукт с ID:', id);
-
   try {
-    const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+    const res = await fetch('/api/products', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id }),
+    });
 
     if (!res.ok) {
       const text = await res.text();
-      console.error('Сервер вернул:', text);
-      toast.error("Ошибка при удалении продукта с ID: " + id);
+      console.error('Ошибка от сервера:', text);
+      toast.error(`Не удалось удалить продукт с ID: ${id}`);
       return;
     }
 
-    // Найдём удаляемый продукт (до удаления из состояния)
     const removedProduct = products.find((p) => p.id === id);
-    console.log('Удалён продукт:', removedProduct);
-
     setProducts((prev) => prev.filter((p) => p.id !== id));
-    toast.success('Продукт удалён: ' + removedProduct?.title || id);
+    toast.success(`Удалён продукт: ${removedProduct?.title || id}`);
   } catch (error) {
-    console.error('Ошибка при удалении:', error);
-    alert('Ошибка при удалении');
+    console.error('Ошибка при fetch:', error);
+    toast.error('Произошла ошибка при удалении');
   }
 };
 

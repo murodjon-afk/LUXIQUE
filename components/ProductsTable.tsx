@@ -45,8 +45,12 @@ export default function ProductsTable() {
   }, [])
 const deleteProduct = async (id: number) => {
   try {
-    const res = await fetch(`/api/products/${id}`, {
+    const res = await fetch('/api/products', {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id }),
     });
 
     if (!res.ok) {
@@ -55,13 +59,12 @@ const deleteProduct = async (id: number) => {
       throw new Error('Ошибка при удалении');
     }
 
-    setProducts(prev => prev.filter(p => Number(p.id) !== id));
+    setProducts(prev => prev.filter(p => Number(p.id) !== Number(id)));
   } catch (error) {
     console.error('Ошибка:', error);
     toast.error('Ошибка при удалении продукта');
   }
 };
-
 
 
   const filteredProducts = products.filter(product => {
