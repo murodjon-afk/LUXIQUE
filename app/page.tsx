@@ -316,7 +316,7 @@ const addToCart = (product: Product) => {
 
   <div
       style={{
-        backgroundImage: `url('/banner.png')`, // Укажи путь к картинке
+        backgroundImage: `url('/banner.png')`, 
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',

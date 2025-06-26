@@ -77,7 +77,6 @@ export default function SellerModal({ isOpen, onClose }: SellerModalProps) {
       if (res.ok) {
         toast.success("Теперь вы продавец");
         onClose();
-        // сброс состояния
         setEmail("");
         setAgree1(false);
         setAgree2(false);

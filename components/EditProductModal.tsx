@@ -74,7 +74,7 @@ const handleSubmit = async () => {
     }
 
     const formData = new FormData();
-    formData.append('id', product.id); // ✅ обязательно, если PATCH через `/api/products`
+    formData.append('id', product.id); 
     formData.append('title', title);
     formData.append('price', price);
     formData.append('description', description);
@@ -83,7 +83,7 @@ const handleSubmit = async () => {
 
     const parsedCount = parseInt(count);
     const rating = {
-      rate: 0, // или можешь заменить на актуальный rate, если он у тебя есть
+      rate: 0, 
       count: isNaN(parsedCount) ? 0 : parsedCount,
     };
     formData.append('rating', JSON.stringify(rating));
