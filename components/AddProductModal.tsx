@@ -32,72 +32,68 @@ export default function AddProductModal({ isOpen, onClose }: Props) {
     }
   }
 
-  const handleSubmit = async () => {
-    if (!title || !price || !category) {
-      return toast.error('⚠️ Заполните обязательные поля')
-    }
-
-    try {
-      const res = await fetch('/api/users')
-      const { users } = await res.json()
-
-      const currentUser = users.find((u: { email: string }) =>
-        u.email?.toLowerCase() === session?.user?.email?.toLowerCase()
-      )
-
-      if (!currentUser) {
-        toast.error('❌ Пользователь не найден')
-        return
-      }
-
-      const formData = new FormData()
-      formData.append('title', title)
-      formData.append('price', price)
-      formData.append('description', description)
-      formData.append('category', category)
-      formData.append('userId', String(currentUser.id))
-
-      const parsedCount = parseInt(count)
-      const ratingWrapper = {
-        rating: {
-          rating: 0,
-          count: isNaN(parsedCount) ? 0 : parsedCount,
-        },
-      }
-
-      formData.append('rating', JSON.stringify(ratingWrapper.rating))
-
-      if (imageFile) {
-        formData.append('image', imageFile)
-      }
-
-      console.log('📦 FormData preview:')
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value)
-      }
-
-      const postRes = await fetch('/api/products', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const postResText = await postRes.text()
-      console.log('📩 Ответ от API:', postResText)
-
-      if (!postRes.ok) {
-        toast.error('❌ Ошибка при создании продукта')
-        return
-      }
-
-      const result = JSON.parse(postResText)
-      console.log('✅ Продукт создан:', result)
-      toast.success('✅ Продукт успешно добавлен!')
-      onClose()
-    } catch (error) {
-      console.error('💥 Ошибка в handleSubmit:', error)
-      toast.error('Ошибка при создании продукта')
-    }
+ const handleSubmit = async () => {
+  if (!title || !price || !category) {
+    return toast.error('⚠️ Заполните обязательные поля')
   }
+
+  try {
+    const res = await fetch('/api/users')
+    const { users } = await res.json()
+
+    const currentUser = users.find((u: { email: string }) =>
+      u.email?.toLowerCase() === session?.user?.email?.toLowerCase()
+    )
+
+    if (!currentUser) {
+      toast.error('❌ Пользователь не найден')
+      return
+    }
+
+    const parsedCount = parseInt(count)
+    const rating = {
+      rating: 0,
+      count: isNaN(parsedCount) ? 0 : parsedCount,
+    }
+
+    const imageUrl = 'https://placehold.co/400x300' 
+
+    const productData = {
+      title,
+      price: Number(price),
+      description,
+      category,
+      userId: String(currentUser.id),
+      image: imageUrl,
+      rating,
+    }
+
+    const postRes = await fetch('/api/products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(productData),
+    })
+
+    const postResText = await postRes.text()
+    console.log('📩 Ответ от API:', postResText)
+
+    if (!postRes.ok) {
+      toast.error('❌ Ошибка при создании продукта')
+      return
+    }
+
+    const result = JSON.parse(postResText)
+    console.log('✅ Продукт создан:', result)
+    toast.success('✅ Продукт успешно добавлен!')
+    onClose()
+  } catch (error) {
+    console.error('💥 Ошибка в handleSubmit:', error)
+    toast.error('Ошибка при создании продукта')
+  }
+}
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
