@@ -44,7 +44,9 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ==================== POST ====================
+
+export const runtime = 'nodejs'; 
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -90,7 +92,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(newProduct, { status: 201 });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('❌ Ошибка при создании продукта:', error);
     return NextResponse.json({ error: 'Ошибка сервера' }, { status: 500 });
   }
