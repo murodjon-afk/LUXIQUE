@@ -193,7 +193,7 @@ const totalQuantity = cartItems.reduce((sum, item) => sum + (item.quantity || 1)
   <button
     id="checkout-button"
     className="w-[80%] h-[40px] bg-green-900 text-white rounded-lg mx-auto cursor-pointer text-sm" // Уменьшенная кнопка и шрифт
-    onClick={openPaymentModal}
+onClick={() => setIsPaymentOpen(true)}
   >
     Перейти к оплате
   </button>
