@@ -49,36 +49,38 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const data = await req.json()
+    const data = await req.json();
 
-    const buyerId = Number(data.buyerId)
-    const sellerId = Number(data.sellerId)
-    const productIds = Array.isArray(data.productIds)
-      ? data.productIds.map((id: string) => Number(id))
-      : []
+    const { title, description, image, price, category, userId } = data;
 
-    // Валидация
+    const parsedPrice = Number(price);
+
     if (
-      !buyerId || isNaN(buyerId) ||
-      !sellerId || isNaN(sellerId) ||
-      productIds.length === 0
+      !title ||
+      !description ||
+      !image ||
+      !category ||
+      !userId ||
+      isNaN(parsedPrice)
     ) {
-      return new NextResponse('Неверные данные заказа', { status: 400 })
+      return new NextResponse('Неверные данные продукта', { status: 400 });
     }
 
-    const newOrder = await prisma.order.create({
+    const newProduct = await prisma.product.create({
       data: {
-        buyerId,
-        sellerId,
-        productIds,
-        status: data.status || 'готовится',
+        title,
+        description,
+        image,
+        category,
+        price: parsedPrice,
+        userId,
       },
-    })
+    });
 
-    return NextResponse.json(newOrder)
+    return NextResponse.json(newProduct, { status: 201 });
   } catch (err) {
-    console.error('❌ Ошибка при создании заказа:', err)
-    return new NextResponse('Ошибка сервера', { status: 500 })
+    console.error('❌ Ошибка при создании продукта:', err);
+    return new NextResponse('Ошибка сервера', { status: 500 });
   }
 }
 
