@@ -28,7 +28,6 @@ const CartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-    const { openPaymentModal } = useModal();
   const [isPaymentOpen, setIsPaymentOpen] = useState(false)
 
 
