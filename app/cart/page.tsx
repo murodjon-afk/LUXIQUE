@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { useModal } from "../../components/ModalProvider";
 import PaymentModal from "../../components/CartModalSummary"
 
 interface Product {
